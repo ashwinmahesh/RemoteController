@@ -39,6 +39,29 @@ socket.on("show-users", (users) => {
   }
 });
 
+socket.on("connect-user", (data) => {
+  const { success, connectTo } = data;
+
+  if (success === 0) {
+    log("error", "User not connected to server");
+  } else if (success === 1) {
+    connection = connectTo;
+  }
+  getCommand();
+});
+
+socket.on("performed-command", (data) => {
+  const { result } = data;
+  console.log(result);
+  getCommand();
+});
+
+socket.on("return", () => {
+  log("info", `Disconnected from ${connection}`);
+  connection = "UNCONNECTED";
+  getCommand();
+});
+
 function log(title, message) {
   console.log(`[${title.toUpperCase()}] ${message}`);
 }
@@ -64,7 +87,7 @@ function handleCommand(command) {
     handleShow();
   } else if (command.substr(0, "connect ".length) === "connect ") {
     handleConnect(command);
-  } else if (command === "return") {
+  } else if (command === "disconnect") {
     handleReturn();
   } else {
     handleDefault(command);
@@ -76,21 +99,18 @@ function handleShow() {
 }
 
 function handleConnect(command) {
-  const connectTo = command.substr("connect ".length, command.length);
-  socket.emit("connect-user", connectTo);
-  socket.on("connect-user", (success) => {
-    if (success === 0) {
-      log("error", "User not connected to server");
-    } else if (success === 1) {
-      connection = connectTo;
-    }
+  if (connection !== "UNCONNECTED") {
+    log("error", "Already connected to a user.");
     getCommand();
-  });
+  } else {
+    const connectTo = command.substr("connect ".length, command.length);
+    socket.emit("connect-user", connectTo);
+  }
 }
 
 function handleHelp() {
   console.log(
-    "\nAVAILABLE COMMANDS: \n\tshow\n\tconnect <user>\n\t[all standard bash commands]\n\treturn\n"
+    "\nAVAILABLE COMMANDS: \n\tshow\n\tconnect <user>\n\t[all standard bash commands]\n\tdisconnect\n"
   );
   getCommand();
 }
@@ -101,11 +121,6 @@ function handleReturn() {
     getCommand();
   } else {
     socket.emit("return");
-    socket.on("return", () => {
-      log("info", `Disconnected from ${connection}`);
-      connection = "UNCONNECTED";
-      getCommand();
-    });
   }
 }
 
@@ -115,12 +130,6 @@ function handleDefault(command) {
     getCommand();
   } else {
     socket.emit("perform-command", command);
-    socket.on("performed-command", (data) => {
-      const { result } = data;
-      console.log(result);
-      // log("res", result);
-      getCommand();
-    });
   }
 }
 

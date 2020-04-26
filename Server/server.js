@@ -50,10 +50,10 @@ recIO.on("connection", (socket) => {
   socket.on("connect-user", (connectTo) => {
     log(socketUser, `Connecting to ${connectTo}`);
     if (!(connectTo in users)) {
-      socket.emit("connect-user", 0);
+      socket.emit("connect-user", { success: 0, connectTo: connectTo });
     } else {
       currentConnection = connectTo;
-      socket.emit("connect-user", 1);
+      socket.emit("connect-user", { success: 1, connectTo: connectTo });
     }
   });
 
