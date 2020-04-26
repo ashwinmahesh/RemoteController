@@ -18,11 +18,13 @@ const users = {};
 const hackers = {};
 
 sendIO.on("connection", (socket) => {
+  let socketUser = "";
   log("connection", `${socket.client.id}`);
 
   socket.on("new-user", (newUser) => {
-    log("new user", `${newUser.substr(0, newUser.length - 1)}`);
-    users[newUser.substr(0, newUser.length - 1)] = socket;
+    socketUser = newUser.substr(0, newUser.length - 1);
+    log("new user", `${socketUser}`);
+    users[socketUser] = socket;
   });
 
   socket.on("performed-command", (data) => {
@@ -30,14 +32,27 @@ sendIO.on("connection", (socket) => {
     log("command", `${command}`);
     log("result", `${result}`);
   });
+
+  socket.on("disconnect", () => {
+    log("disconnect", `${socketUser}`);
+    delete users[socketUser];
+  });
 });
 
 //Replace this with receiver socket once finished
 recIO.on("connection", (socket) => {
+  let socketUser = "";
+
   log("connection", `${socket.client.id}`);
   socket.on("new-hacker", (newHacker) => {
-    log("new hacker", `${newHacker.substr(0, newHacker.length - 1)}`);
-    hackers[newHacker.substr(0, newHacker.length - 1)] = socket;
+    socketUser = newHacker.substr(0, newHacker.length - 1);
+    log("new hacker", socketUser);
+    hackers[socketUser] = socket;
+  });
+
+  socket.on("disconnect", () => {
+    log("hacker disconnect", `${socketUser}`);
+    delete hackers[socketUser];
   });
 });
 
