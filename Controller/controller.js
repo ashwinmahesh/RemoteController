@@ -31,7 +31,6 @@ function log(title, message) {
   console.log(`[${title.toUpperCase()}] ${message}`);
 }
 
-// let command = "";
 let connection = "UNCONNECTED";
 
 function getCommand() {
@@ -40,16 +39,30 @@ function getCommand() {
       log("end", "Closing controller");
       inputReader.close();
       process.exit(1);
-    } else if (command === "help") {
-      console.log(
-        "\nAVAILABLE COMMANDS: \n\tshow\n\tconnect <user>\n\t[all standard bash commands]\n\tdisconnect\n"
-      );
-      getCommand();
     } else {
-      console.log("You entered command: ", command);
-      getCommand();
+      handleCommand(command);
     }
   });
+}
+
+function handleCommand(command) {
+  if (command === "help") {
+    console.log(
+      "\nAVAILABLE COMMANDS: \n\tshow\n\tconnect <user>\n\t[all standard bash commands]\n\tdisconnect\n"
+    );
+    getCommand();
+  } else if (command === "show") {
+    socket.emit("show-users");
+    socket.on("show-users", (users) => {
+      for (let i = 0; i < users.length; i++) {
+        console.log(`\t${users[i]}`);
+      }
+      getCommand();
+    });
+  } else {
+    console.log("\nCommand not valid\n");
+    getCommand();
+  }
 }
 
 // while (command != "exit") {

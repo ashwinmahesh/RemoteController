@@ -42,12 +42,17 @@ sendIO.on("connection", (socket) => {
 //Replace this with receiver socket once finished
 recIO.on("connection", (socket) => {
   let socketUser = "";
-
   log("connection", `${socket.client.id}`);
+
   socket.on("new-hacker", (newHacker) => {
     socketUser = newHacker.substr(0, newHacker.length - 1);
     log("new hacker", socketUser);
     hackers[socketUser] = socket;
+  });
+
+  socket.on("show-users", () => {
+    log(socketUser, "show");
+    socket.emit("show-users", Object.keys(users));
   });
 
   socket.on("disconnect", () => {
