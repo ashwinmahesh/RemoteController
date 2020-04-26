@@ -34,7 +34,7 @@ function log(title, message) {
 let connection = "UNCONNECTED";
 
 function getCommand() {
-  inputReader.question(`[${connection}]: `, (command) => {
+  inputReader.question(`${connection} % `, (command) => {
     if (command === "exit") {
       log("end", "Closing controller");
       inputReader.close();
@@ -59,22 +59,21 @@ function handleCommand(command) {
       }
       getCommand();
     });
+  } else if (command.substr(0, "connect ".length) === "connect ") {
+    const connectTo = command.substr("connect ".length, command.length);
+    socket.emit("connect-user", connectTo);
+    socket.on("connect-user", (success) => {
+      if (success === 0) {
+        log("error", "User not connected to server");
+      } else if (success === 1) {
+        connection = connectTo;
+      }
+      getCommand();
+    });
   } else {
     console.log("\nCommand not valid\n");
     getCommand();
   }
 }
 
-// while (command != "exit") {
-//   // process.stdout.write(`[${connection}]: `);
-//   inputReader.question(`[${connection}]: `, async (newCommand) => {
-//     console.log("You entered command: ", newCommand);
-//     command = newCommand;
-//   });
-//   // const newCommand = await inputReader.question(`[$(connection)]`);
-//   // console.log("You entered command: ", newCommand);
-//   // command = newCommand;
-// }
-
-setTimeout(() => getCommand(), 300);
-// getCommand();
+setTimeout(() => getCommand(), 500);
