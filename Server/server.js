@@ -43,6 +43,7 @@ sendIO.on("connection", (socket) => {
 recIO.on("connection", (socket) => {
   let socketUser = "";
   let currentConnection = "";
+
   log("connection", `${socket.client.id}`);
 
   socket.on("new-hacker", (newHacker) => {
@@ -61,8 +62,15 @@ recIO.on("connection", (socket) => {
     if (!(connectTo in users)) {
       socket.emit("connect-user", 0);
     } else {
+      currentConnection = connectTo;
       socket.emit("connect-user", 1);
     }
+  });
+
+  socket.on("return", () => {
+    log(socketUser, `Terminating connection to ${currentConnection}`);
+    currentConnection = "";
+    socket.emit("return");
   });
 
   socket.on("disconnect", () => {

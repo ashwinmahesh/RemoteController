@@ -48,7 +48,7 @@ function getCommand() {
 function handleCommand(command) {
   if (command === "help") {
     console.log(
-      "\nAVAILABLE COMMANDS: \n\tshow\n\tconnect <user>\n\t[all standard bash commands]\n\tdisconnect\n"
+      "\nAVAILABLE COMMANDS: \n\tshow\n\tconnect <user>\n\t[all standard bash commands]\n\treturn\n"
     );
     getCommand();
   } else if (command === "show") {
@@ -70,6 +70,18 @@ function handleCommand(command) {
       }
       getCommand();
     });
+  } else if (command === "return") {
+    if (connection === "UNCONNECTED") {
+      console.log("No connection established");
+      getCommand();
+    } else {
+      socket.emit("return");
+      socket.on("return", () => {
+        log("info", `Disconnected from ${connection}`);
+        connection = "UNCONNECTED";
+        getCommand();
+      });
+    }
   } else {
     console.log("\nCommand not valid\n");
     getCommand();
