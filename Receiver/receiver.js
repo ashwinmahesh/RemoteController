@@ -20,7 +20,8 @@ socket.on("connect", () => {
   socket.emit("new-user", USER);
 });
 
-socket.on("perform-command", (command) => {
+socket.on("perform-command", (data) => {
+  const { user, command } = data;
   log("command", `${command}`);
   let result = "";
   exec(command, (err, stdout, stderr) => {
@@ -32,6 +33,7 @@ socket.on("perform-command", (command) => {
     socket.emit("performed-command", {
       command: command,
       result: result,
+      user: user,
     });
   });
 });

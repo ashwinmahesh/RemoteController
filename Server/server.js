@@ -18,11 +18,10 @@ sendIO.on("connection", (socket) => {
     users[socketUser] = socket;
   });
 
-  // socket.on("performed-command", (data) => {
-  //   const { command, result } = data;
-  //   log("command", `${command}`);
-  //   log("result", `${result}`);
-  // });
+  socket.on("performed-command", (data) => {
+    const { user } = data;
+    hackers[user].emit("performed-command", data);
+  });
 
   socket.on("disconnect", () => {
     log("disconnect", `${socketUser}`);
@@ -64,11 +63,16 @@ recIO.on("connection", (socket) => {
   });
 
   socket.on("perform-command", (command) => {
-    users[currentConnection].emit("perform-command", command);
-    //This is the issue. Don't create listeners within listeners.
-    users[currentConnection].on("performed-command", (data) => {
-      socket.emit("performed-command", data);
-    });
+    if (!(currentConnection in users)) {
+      socket.emit("performed-command", {
+        result: "User disconnected from server. Connect to another user",
+      });
+    } else {
+      users[currentConnection].emit("perform-command", {
+        user: socketUser,
+        command: command,
+      });
+    }
   });
 
   socket.on("disconnect", () => {

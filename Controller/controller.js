@@ -52,12 +52,12 @@ socket.on("connect-user", (data) => {
 
 socket.on("performed-command", (data) => {
   const { result } = data;
-  console.log(result);
+  console.log(result.substr(0, result.length - 1));
   getCommand();
 });
 
 socket.on("return", () => {
-  log("info", `Disconnected from ${connection}`);
+  console.log(`Disconnected from ${connection}`);
   connection = "UNCONNECTED";
   getCommand();
 });
@@ -100,7 +100,7 @@ function handleShow() {
 
 function handleConnect(command) {
   if (connection !== "UNCONNECTED") {
-    log("error", "Already connected to a user.");
+    console.log("Already connected to a user.");
     getCommand();
   } else {
     const connectTo = command.substr("connect ".length, command.length);
