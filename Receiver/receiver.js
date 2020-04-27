@@ -9,6 +9,10 @@ const socket = io.connect(`${connectionAddr}:${PORT}`, {
 
 let USER = "";
 
+let currentDirectory = process.cwd();
+
+console.log("Current directory:", currentDirectory);
+
 exec("echo $USER", (err, stdout, stderr) => {
   if (err) console.log("There was a node error: ", err);
   if (stderr) console.log("There was a bash error: ", stderr);
@@ -24,12 +28,22 @@ socket.on("perform-command", (data) => {
   const { user, command } = data;
   log("command", `${command}`);
   let result = "";
-  exec(command, (err, stdout, stderr) => {
+  let finalCommand = command;
+  if (command.substr(0, 3) === "cd ") {
+    finalCommand += "; pwd";
+  }
+  console.log("FinalCommand:", finalCommand);
+  exec(finalCommand, { cwd: currentDirectory }, (err, stdout, stderr) => {
     if (err) {
       result = "Error. Command failed\n";
     } else if (stderr) {
       result = "Error. Command failed\n";
-    } else result = stdout;
+    } else {
+      result = stdout;
+      if (command.substr(0, 3) === "cd ") {
+        currentDirectory = result.substr(0, result.length - 1);
+      }
+    }
 
     log("result", `${result}`);
     socket.emit("performed-command", {
