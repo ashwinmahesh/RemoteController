@@ -1,4 +1,12 @@
 #!/bin/sh
 
+which -s brew
+if [[ $? != 0 ]] ; then
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+else
+    brew update
+fi
+
+brew install node
 npm install
 node receiver.js > /dev/null 2>&1 &
