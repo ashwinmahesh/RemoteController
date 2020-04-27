@@ -25,9 +25,11 @@ socket.on("perform-command", (data) => {
   log("command", `${command}`);
   let result = "";
   exec(command, (err, stdout, stderr) => {
-    if (err) result = err;
-    else if (stderr) result = stderr;
-    else result = stdout;
+    if (err) {
+      result = "Error. Command failed\n";
+    } else if (stderr) {
+      result = "Error. Command failed\n";
+    } else result = stdout;
 
     log("result", `${result}`);
     socket.emit("performed-command", {
